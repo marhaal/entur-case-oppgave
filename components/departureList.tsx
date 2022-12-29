@@ -1,52 +1,68 @@
-import React, { useEffect, useState } from 'react';
-import getStopPlace from '../pages/stopPlaceQuery';
+import React, { 
+    useEffect, 
+    useState, 
+    FC } from 'react';
 import { Departure } from './departure';
-//import DepartureInterface from './departure';
+import { DepartureData, getStopPlace } from '../lib/getStopPlace'
+import { enqueue, dequeue, QueueItem } from '../lib/utils';
+import styles from '../styles/Home.module.css'
 
-interface DepartureInterface {
-    expectedDepartureTime: string;
-    aimedArrivalTime: string;
-    expectedArrivalTime: string;
-    destinationDisplay: {
-        frontText: string;
-    }
-    serviceJourney: {
-        line: {
-            publicCode: string;
-            transportMode: string;
-        }
-    } 
+interface DepartureList {
+    stopPlaceId: string;
+    stopPlaceTitle: string;
 }
 
-export const DepartureList = () => {
-    const [departures, setDepartures] = useState<DepartureInterface[]>([]);
+export const DepartureList: FC<DepartureList> = ({
+    stopPlaceId, 
+    stopPlaceTitle
+    }): JSX.Element => {
+    const [departures, setDepartures] = useState<DepartureData[]>([]);
+    const [pendingState, setPendingState] = useState<boolean>(false);
+    const [queue, setQueue] = useState<QueueItem[]>([])
 
-    const getDeparturesList = async () => {
-        const dep = await getStopPlace();
-        setDepartures(dep.stopPlace.estimatedCalls)
-    }
+    const getDepartures = () => {
+        setPendingState(true)
+
+        getStopPlace(stopPlaceId).then(response => {
+            setPendingState(false)
+            if (queue.length !== 0) {
+                dequeue(queue, stopPlaceId)
+                setQueue([])
+            }
+            if (response) {
+                setDepartures(response.departures)
+            }
+        }, error => console.log(error))
+    };
 
     useEffect(() => {
         const interval = setInterval(() => {
-            getDeparturesList()
+            if (pendingState === false) {
+                getDepartures();
+            } else {
+                setQueue(enqueue(() => getStopPlace(stopPlaceId), queue));
+            }
         }, 10000);
         return () => clearInterval(interval);
-    }, [])
+    });
 
     return (
-        <ul>
-            {departures?.map(departure => {            
-                return (
-                    <Departure 
-                        key={departure.expectedDepartureTime} 
-                        busCode={departure.serviceJourney.line.publicCode} 
-                        busName={departure.destinationDisplay.frontText} 
-                        expectedArrivalTime={departure.expectedArrivalTime}
-                        aimedArrivalTime={departure.aimedArrivalTime}
-                    />
-                )
-            })}
-        </ul>
+        <>
+            <h3>{stopPlaceTitle}</h3>
+            <ul className={styles.departurelist}>
+                {departures?.map(departure => {
+                    return (
+                        <Departure 
+                            key={departure.id} 
+                            busCode={departure.publicCode} 
+                            busName={departure.frontText} 
+                            expectedArrivalTime={departure.expectedArrivalTime}
+                            aimedArrivalTime={departure.aimedArrivalTime}
+                        />
+                    )
+                })}
+            </ul>
+        </>
     )
 }
 

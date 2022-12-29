@@ -16,8 +16,7 @@ export default function Home() {
         <h1 className={styles.title}>
           Entur Case
         </h1>
-        <h3>Jernbanetorget bussholdeplass</h3>
-        <DepartureList />
+        <DepartureList stopPlaceId="4000" stopPlaceTitle="Jernbanetorget bussholdeplass"/>
       </main>
 
       <footer className={styles.footer}>
