@@ -1,11 +1,11 @@
 import React, {FC} from 'react';
-import { calculateTimeDifferenceInMinutes } from '../lib/utils';
+import { timeDifferenceInMinutes } from '../lib/utils';
 
 interface Departure {
     busCode: string;
     busName: string;
-    expectedArrivalTime: string;
-    aimedArrivalTime: string;
+    expectedArrivalTime: Date;
+    aimedArrivalTime: Date;
 }
 
 export const Departure: FC<Departure> = ({
@@ -14,28 +14,28 @@ export const Departure: FC<Departure> = ({
     expectedArrivalTime,
     aimedArrivalTime
     }): JSX.Element => {
+    const currentDateTime = new Date();
 
-    function calculateTimeToDeparture() {
-        const currentDateTime = new Date();
-        const busArrivalDateTime = new Date(expectedArrivalTime);
-        return calculateTimeDifferenceInMinutes(busArrivalDateTime, currentDateTime)
+    function getArrivalInfo(): string {
+        const timeToArrival = timeDifferenceInMinutes(expectedArrivalTime, currentDateTime);
+        if (timeToArrival === 0) {
+            return 'nå'
+        } 
+        else if (timeToArrival > 10) {
+            return `${expectedArrivalTime.getHours()}:${expectedArrivalTime.getMinutes()}`
+        } else {
+            return `${timeToArrival} min`
+        }
     }
 
-    const timeToArrival: number = calculateTimeToDeparture()
-    const arrivalInfo = timeToArrival === 0 
-        ? 'nå' 
-        : `${timeToArrival} min`;
-
-    function calculateIsDelayed() {
-        const delayTime = calculateTimeDifferenceInMinutes(new Date(aimedArrivalTime), new Date(expectedArrivalTime))
-        return delayTime < 0 
-            ? `(Forsinket ca. ${Math.abs(delayTime)} minutter)` 
-            : '';
-    }  
+    function calculateIsDelayed(): string {
+        const delayTime = timeDifferenceInMinutes(aimedArrivalTime, expectedArrivalTime)
+        return delayTime < 0 ? `(Forsinket ca. ${Math.abs(delayTime)} minutter)` : '';
+    }
 
     return (
         <li>
-            {busCode + ' ' + busName + ' ' + arrivalInfo + ' ' + calculateIsDelayed()}
+            {busCode + ' ' + busName + ' ' + getArrivalInfo() + ' ' + calculateIsDelayed()}
         </li>
     )
 }

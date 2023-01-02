@@ -7,7 +7,7 @@ import { DepartureData, getStopPlace } from '../lib/getStopPlace'
 import { enqueue, dequeue, QueueItem } from '../lib/utils';
 import styles from '../styles/Home.module.css'
 
-interface DepartureList {
+type DepartureList = {
     stopPlaceId: string;
     stopPlaceTitle: string;
 }
@@ -56,8 +56,8 @@ export const DepartureList: FC<DepartureList> = ({
                             key={departure.id} 
                             busCode={departure.publicCode} 
                             busName={departure.frontText} 
-                            expectedArrivalTime={departure.expectedArrivalTime}
-                            aimedArrivalTime={departure.aimedArrivalTime}
+                            expectedArrivalTime={new Date(departure.expectedArrivalTime)}
+                            aimedArrivalTime={new Date(departure.aimedArrivalTime)}
                         />
                     )
                 })}
