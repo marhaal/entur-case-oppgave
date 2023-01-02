@@ -25,6 +25,6 @@ export function dequeue(
     item.promise(id)
 }
 
-export function calculateTimeDifferenceInMinutes(from: Date, to: Date): number {
+export function timeDifferenceInMinutes(from: Date, to: Date): number {
     return Math.round((((from.getTime() - to.getTime())% 86400000) % 3600000) / 60000)
 }

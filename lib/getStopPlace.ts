@@ -20,8 +20,7 @@ export async function getStopPlace(id: string): Promise<StopPlaceResponse> {
       ) {
         name
         id
-        estimatedCalls(numberOfDepartures: 10) {
-          expectedDepartureTime
+        estimatedCalls(numberOfDepartures: 15) {
           aimedArrivalTime
           expectedArrivalTime
           destinationDisplay {
